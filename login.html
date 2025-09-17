@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول - JŌ Store</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body { font-family:"Cairo",sans-serif; background:#f7f7f7; margin:0; padding:0; transition:0.3s; }
+header, footer { text-align:center; padding:10px; }
+.form { background:#fff; padding:20px; border-radius:20px; box-shadow:0 5px 15px rgba(0,0,0,0.1); text-align:center; min-width:300px; animation:fadeIn 0.6s ease; }
+#heading { font-size:24px; margin-bottom:15px; font-weight:bold; }
+.field { margin-bottom:10px; position:relative; }
+.input-field { width:90%; padding:10px; border-radius:8px; border:1px solid #ccc; outline:none; transition:all 0.3s ease; }
+.input-field:focus { border-color:#2196f3; box-shadow:0 0 5px #2196f3; }
+.btn { display:flex; justify-content:center; gap:10px; margin-top:10px; }
+.button1, .button2, .button3 { padding:10px; border:none; border-radius:8px; cursor:pointer; transition: transform 0.2s ease, background 0.3s ease; }
+.button1 { background:#4caf50; color:white; }
+.button2 { background:#2196f3; color:white; }
+.button3 { background:none; color:#2196f3; text-decoration:underline; font-size:14px; }
+.button1:hover, .button2:hover { transform:scale(1.05); }
+.toast { position: fixed; bottom:20px; right:20px; padding:12px 20px; border-radius:8px; color:white; opacity:0; transform:translateY(30px); animation:slideUp 0.5s forwards; z-index:9999; }
+.toast.success { background:#4caf50; }
+.toast.error { background:#f44336; }
+@keyframes slideUp { to{ opacity:1; transform:translateY(0); } }
+@keyframes fadeIn { from{opacity:0; transform:scale(0.95);} to{opacity:1; transform:scale(1);} }
+</style>
+</head>
+<body>
+<header>
+  <h1>JŌ Store</h1>
+  <button onclick="toggleDarkMode()" style="margin-top:10px;">🌙/☀️</button>
+</header>
+
+<div style="display:flex;justify-content:center;align-items:center;height:80vh;">
+  <form class="form" onsubmit="return login(event)">
+    <p id="heading">تسجيل الدخول</p>
+    <div class="field"><input id="username" autocomplete="off" placeholder="اسم المستخدم" class="input-field" type="text"></div>
+    <div class="field"><input id="phone" autocomplete="off" placeholder="رقم الهاتف" class="input-field" type="tel"></div>
+    <div class="field"><input id="password" placeholder="كلمة المرور" class="input-field" type="password"></div>
+    <div class="btn">
+      <button type="submit" class="button1">دخول</button>
+      <button type="button" onclick="signup()" class="button2">تسجيل حساب جديد</button>
+    </div>
+    <button type="button" class="button3" onclick="forgotPassword()">هل نسيت كلمة المرور؟</button>
+  </form>
+</div>
+
+<footer>
+  جميع الحقوق محفوظة © 2025 JŌ Store
+</footer>
+
+<script>
+function toggleDarkMode(){ document.body.classList.toggle("dark-mode"); }
+
+function showToast(msg,type="success"){
+  let t=document.createElement("div");
+  t.className="toast "+type+" show";
+  t.innerText=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.classList.remove("show");},3000);
+  setTimeout(()=>{t.remove();},3500);
+}
+
+function login(e){
+  e.preventDefault();
+  let user=document.getElementById("username").value.trim();
+  let phone=document.getElementById("phone").value.trim();
+  let pass=document.getElementById("password").value.trim();
+  if(!user||!phone||!pass){ showToast("⚠️ يرجى ملء جميع الحقول","error"); return; }
+
+  // تحقق الأدمن
+  if(user==="يوسف" && phone==="01023450886" && pass==="2310"){
+    showToast("✅ مرحبًا يا يوسف (الأدمن)","success");
+    setTimeout(()=> window.location.href="admin.html",1000);
+    return;
+  }
+
+  // باقي الحسابات العادية
+  let account=JSON.parse(localStorage.getItem("account"));
+  if(account && account.user===user && account.phone===phone && account.pass===btoa(pass)){
+    localStorage.setItem("loggedInUser",user);
+    showToast("✅ تم تسجيل الدخول","success");
+    setTimeout(()=> window.location.href="index.html",1000);
+  } else { showToast("❌ بيانات غير صحيحة","error"); }
+}
+
+function signup(){
+  let user=document.getElementById("username").value.trim();
+  let phone=document.getElementById("phone").value.trim();
+  let pass=document.getElementById("password").value.trim();
+  if(!user||!phone||!pass){ showToast("⚠️ يرجى ملء جميع الحقول","error"); return; }
+  let account=JSON.parse(localStorage.getItem("account"));
+  if(account && account.user===user){ showToast("❌ الحساب موجود بالفعل","error"); return; }
+  localStorage.setItem("account",JSON.stringify({user,phone,pass:btoa(pass)}));
+  showToast("✅ تم إنشاء الحساب بنجاح","success");
+}
+
+function forgotPassword(){
+  let phone=document.getElementById("phone").value.trim();
+  if(!phone){ showToast("⚠️ أدخل رقم الهاتف","error"); return; }
+
+  // تحقق الأدمن
+  if(phone==="01023450886"){
+    showToast("✅ سيتم إرسال كلمة مرور الأدمن على واتساب","success");
+    setTimeout(()=> window.open(`https://wa.me/${phone}?text=كلمة المرور الخاصة بالأدمن: 2310`,"_blank"),1000);
+    return;
+  }
+
+  let account=JSON.parse(localStorage.getItem("account"));
+  if(account && account.phone===phone){
+    let pass=atob(account.pass);
+    showToast("✅ سيتم إرسال كلمة المرور على واتساب","success");
+    setTimeout(()=> window.open(`https://wa.me/${phone}?text=كلمة المرور الخاصة بك: ${pass}`,"_blank"),1000);
+  } else { showToast("❌ رقم الهاتف غير موجود","error"); }
+}
+
+// إعادة التوجيه لو المستخدم سجل دخول سابقًا
+if(localStorage.getItem("loggedInUser")){ window.location.href="index.html"; }
+</script>
+</body>
+</html>

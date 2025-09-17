@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم - JŌ Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body { font-family:'Cairo',sans-serif; background:#111; color:#fdd835; padding:20px; transition:.3s; }
+h2 { text-align:center; margin-bottom:20px; }
+.admin-panel { background:#222; padding:20px; border-radius:10px; max-width:500px; margin:auto; }
+input, button { width:100%; margin:10px 0; padding:10px; border-radius:5px; border:none; font-weight:bold; }
+button { background:#fdd835; color:#000; cursor:pointer; transition:.3s; }
+button:hover { background:#fff176; }
+.colors { display:flex; gap:10px; margin:10px 0; flex-wrap:wrap; }
+.color-option { width:25px; height:25px; border-radius:50%; cursor:pointer; border:2px solid #fff; transition:.3s; }
+.color-option.active { transform:scale(1.3); border-color:#fdd835; box-shadow:0 0 8px #fdd835; }
+.product-list { margin-top:30px; }
+.product-item { background:#333; padding:15px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; animation: fadeIn .5s ease; }
+.product-item img { width:50px; height:50px; object-fit:cover; border-radius:5px; margin-left:10px; }
+.toast { position:fixed; bottom:20px; right:20px; background:#333; color:#fff; padding:15px 20px; border-radius:8px; opacity:0; pointer-events:none; transition:opacity .5s, transform .5s; font-size:14px; transform:translateY(30px); }
+.toast.show { opacity:1; pointer-events:auto; transform:translateY(0); }
+.toast.success { border-right:5px solid #4caf50; }
+.toast.error { border-right:5px solid #f44336; }
+.toast.confirm { border-right:5px solid #2196f3; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+</style>
+</head>
+<body>
+<h2>لوحة تحكم الأدمن - JŌ Store</h2>
+
+<div class="admin-panel">
+<input type="text" id="pname" placeholder="اسم المنتج">
+<input type="number" id="pprice" placeholder="السعر">
+<input type="file" id="pimage" accept="image/*">
+<div class="colors">
+<span class="color-option" style="background:red" onclick="pickColor(this,'red')"></span>
+<span class="color-option" style="background:blue" onclick="pickColor(this,'blue')"></span>
+<span class="color-option" style="background:black" onclick="pickColor(this,'black')"></span>
+<span class="color-option" style="background:green" onclick="pickColor(this,'green')"></span>
+<span class="color-option" style="background:white" onclick="pickColor(this,'white')"></span>
+</div>
+<button id="saveBtn" onclick="saveProduct()">➕ إضافة المنتج</button>
+<button onclick="goIndex()">🏠 الرئيسية</button>
+<button onclick="logout()">🚪 تسجيل خروج</button>
+</div>
+
+<div class="product-list" id="productList"></div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+let pickedColors=[];
+let products=JSON.parse(localStorage.getItem("products"))||[];
+let editId=null;
+
+function pickColor(el,color){
+  el.classList.toggle("active");
+  if(pickedColors.includes(color)) pickedColors=pickedColors.filter(c=>c!==color);
+  else pickedColors.push(color);
+}
+
+function showToast(msg,type="success"){
+  const toast=document.getElementById("toast");
+  toast.innerText=msg;
+  toast.className=`toast show ${type}`;
+  setTimeout(()=>{ toast.className="toast"; },3000);
+}
+
+function renderProducts(){
+  const list=document.getElementById("productList");
+  list.innerHTML="";
+  products.forEach(p=>{
+    const div=document.createElement("div");
+    div.className="product-item";
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;">
+        <img src="${p.image}">
+        <span>${p.name} - ${p.price} EGP</span>
+      </div>
+      <div>
+        <button onclick="editProduct(${p.id})">✏️ تعديل</button>
+        <button onclick="deleteProduct(${p.id})">🗑️ حذف</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function saveProduct(){
+  const name=document.getElementById("pname").value.trim();
+  const price=document.getElementById("pprice").value.trim();
+  const file=document.getElementById("pimage").files[0];
+
+  if(!name || !price || (pickedColors.length===0)) return showToast("⚠️ الرجاء إدخال جميع البيانات واختيار الألوان","error");
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    if(editId){
+      const index=products.findIndex(p=>p.id===editId);
+      products[index]={id:editId,name,price,image:e.target.result,colors:[...pickedColors]};
+      editId=null;
+      document.getElementById("saveBtn").innerText="➕ إضافة المنتج";
+      showToast("✏️ تم تعديل المنتج","confirm");
+    } else {
+      const product={id:Date.now(),name,price,image:e.target.result,colors:[...pickedColors]};
+      products.push(product);
+      showToast("✅ تم إضافة المنتج","success");
+    }
+    pickedColors=[];
+    document.querySelectorAll(".color-option").forEach(c=>c.classList.remove("active"));
+    document.getElementById("pname").value="";
+    document.getElementById("pprice").value="";
+    document.getElementById("pimage").value="";
+    localStorage.setItem("products",JSON.stringify(products));
+    renderProducts();
+  };
+  if(file) reader.readAsDataURL(file);
+  else showToast("⚠️ يرجى اختيار صورة","error");
+}
+
+function editProduct(id){
+  const product=products.find(p=>p.id===id);
+  document.getElementById("pname").value=product.name;
+  document.getElementById("pprice").value=product.price;
+  editId=id;
+  document.getElementById("saveBtn").innerText="💾 حفظ التعديلات";
+  pickedColors=[...product.colors];
+  document.querySelectorAll(".color-option").forEach(c=>{
+    c.classList.remove("active");
+    if(pickedColors.includes(c.getAttribute("onclick").split("'")[1])) c.classList.add("active");
+  });
+}
+
+function deleteProduct(id){
+  if(confirm("🗑️ هل تريد حذف هذا المنتج؟")){
+    products=products.filter(p=>p.id!==id);
+    localStorage.setItem("products",JSON.stringify(products));
+    renderProducts();
+    showToast("🗑️ تم حذف المنتج","error");
+  }
+}
+
+function goIndex(){ window.location.href="index.html"; }
+function logout(){ localStorage.removeItem("loggedInUser"); window.location.href="login.html"; }
+
+renderProducts();
+</script>
+</body>
+</html>
+

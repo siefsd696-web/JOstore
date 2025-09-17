@@ -1,0 +1,152 @@
+/* تنسيقات عامة */
+body {
+  font-family: "Cairo", sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  direction: rtl;
+  transition: background 0.3s, color 0.3s;
+}
+
+header, footer {
+  background-color: #000;
+  color: #fdd835;
+  text-align: center;
+  padding: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease, background 0.3s ease, opacity 0.3s ease;
+  background: #fdd835;
+  color: #000;
+}
+button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* وضع ليلي */
+.dark-mode {
+  background: #121212;
+  color: #eee;
+}
+.dark-mode header, 
+.dark-mode footer {
+  background: #222;
+  color: #fdd835;
+}
+.dark-mode .product {
+  background: #1e1e1e;
+  border: 2px solid #fdd835;
+  color: #fff;
+}
+.dark-mode .color-circle.selected {
+  border: 3px solid #fff;
+}
+.dark-mode button {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+.dark-mode input[type="number"] {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+/* Toast (رسائل احترافية) */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  min-width: 250px;
+  max-width: 320px;
+  background: #333;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(50px) scale(0.8);
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  z-index: 10000;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.toast.success { border-left: 5px solid #4caf50; background: #2e7d32; }
+.toast.error { border-left: 5px solid #f44336; background: #c62828; }
+.toast.info { border-left: 5px solid #2196f3; background: #1565c0; }
+
+/* منتجات */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+.product {
+  background: #fff;
+  border: 2px solid #fdd835;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: background 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.product:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+}
+.product img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.3s;
+}
+.product img:hover {
+  transform: scale(1.05);
+}
+.product h3 {
+  margin: 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* اختيار الألوان */
+.color-options {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+.color-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  transition: transform 0.2s, border 0.3s, box-shadow 0.3s;
+}
+.color-circle:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+.color-circle.selected {
+  border: 3px solid #000;
+  box-shadow: 0 0 8px #fdd835;
+}
